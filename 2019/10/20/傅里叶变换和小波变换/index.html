@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文目录 CSI数据说明  matlab实现简单变换     本文参考Linux 802.11n CSI Tool 小波变换 完美通俗解读 小波变换基础 傅立叶分析和小波分析之间的关系 从傅里叶变换进阶到小波变换（一） 从傅里叶变换进阶到小波变换（二）          笔记 【1】list station mac address 12$ sudo ls /sys/kernel/debug/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="matlab实现傅里叶变换">
+<meta property="og:url" content="http://yoursite.com/2019/10/20/傅里叶变换和小波变换/index.html">
+<meta property="og:site_name" content="记载点滴">
+<meta property="og:description" content="本文目录 CSI数据说明  matlab实现简单变换     本文参考Linux 802.11n CSI Tool 小波变换 完美通俗解读 小波变换基础 傅立叶分析和小波分析之间的关系 从傅里叶变换进阶到小波变换（一） 从傅里叶变换进阶到小波变换（二）          笔记 【1】list station mac address 12$ sudo ls /sys/kernel/debug/">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://yoursite.com/2019/10/20/images/FT/image1.png">
+<meta property="og:image" content="http://yoursite.com/2019/10/20/images/FT/image2.png">
+<meta property="og:image" content="http://yoursite.com/2019/10/20/images/FT/image3.png">
+<meta property="og:image" content="http://yoursite.com/2019/10/20/images/FT/image4.png">
+<meta property="og:updated_time" content="2019-10-23T07:42:10.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="matlab实现傅里叶变换">
+<meta name="twitter:description" content="本文目录 CSI数据说明  matlab实现简单变换     本文参考Linux 802.11n CSI Tool 小波变换 完美通俗解读 小波变换基础 傅立叶分析和小波分析之间的关系 从傅里叶变换进阶到小波变换（一） 从傅里叶变换进阶到小波变换（二）          笔记 【1】list station mac address 12$ sudo ls /sys/kernel/debug/">
+<meta name="twitter:image" content="http://yoursite.com/2019/10/20/images/FT/image1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/10/20/傅里叶变换和小波变换/">
+
+
+
+
+
+  <title>matlab实现傅里叶变换 | 记载点滴</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">记载点滴</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/20/傅里叶变换和小波变换/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="几个不知名的同学">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="记载点滴">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">matlab实现傅里叶变换</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-10-20T11:15:58+08:00">
+                2019-10-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <br>
+
+
+<h2 id="本文目录"><a href="#本文目录" class="headerlink" title="本文目录"></a>本文目录</h2><ul>
+<li><p>CSI数据说明</p>
+</li>
+<li><p>matlab实现简单变换</p>
+<br>
+<hr>
+<br>
+
+<h3 id="本文参考"><a href="#本文参考" class="headerlink" title="本文参考"></a>本文参考</h3><p><a href="http://dhalperi.github.io/linux-80211n-csitool/faq.html" target="_blank" rel="noopener">Linux 802.11n CSI Tool</a></p>
+<p><a href="https://blog.csdn.net/neufeifatonju/article/details/80483282" target="_blank" rel="noopener">小波变换 完美通俗解读</a></p>
+<p><a href="https://blog.csdn.net/a40850273/article/details/81775028" target="_blank" rel="noopener">小波变换基础</a></p>
+<p><a href="https://www.zhihu.com/question/22864189/answer/40772083" target="_blank" rel="noopener">傅立叶分析和小波分析之间的关系</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/66189212" target="_blank" rel="noopener">从傅里叶变换进阶到小波变换（一）</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/66246381" target="_blank" rel="noopener">从傅里叶变换进阶到小波变换（二）</a></p>
+</li>
+</ul>
+ <br>
+ <hr>
+ <br>
+
+<h1 id="笔记"><a href="#笔记" class="headerlink" title="笔记"></a>笔记</h1><p> 【1】list station mac address</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ls /sys/kernel/debug/ieee80211/phy0/netdev:wlan0/stations/</span><br><span class="line">00:0f:34:9d:01:a0</span><br></pre></td></tr></table></figure>
+
+<p>【2】Parsing the CSI trace file<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cd linux-80211n-csitool-supplementary/matlab</span><br></pre></td></tr></table></figure></p>
+<p>In MATLAB or Octave</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">// use the sample_data or use the generated data </span><br><span class="line">csi_trace = read_bf_file(&apos;sample_data/log.all_csi.6.7.6&apos;);</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line">```angular2</span><br><span class="line">csi_entry = csi_trace&#123;1&#125;	(Note the curly-braces &#123;&#125;, not parentheses ().)</span><br><span class="line"></span><br><span class="line">csi_entry =</span><br><span class="line"></span><br><span class="line">    timestamp_low: 4            (In the sample trace, timestamp_low is invalid and always 4.)</span><br><span class="line">       bfee_count: 72           </span><br><span class="line">              Nrx: 3</span><br><span class="line">              Ntx: 1</span><br><span class="line">           rssi_a: 33</span><br><span class="line">           rssi_b: 37</span><br><span class="line">           rssi_c: 41</span><br><span class="line">            noise: -127</span><br><span class="line">              agc: 38</span><br><span class="line">             perm: [3 2 1]</span><br><span class="line">             rate: 256</span><br><span class="line">              csi: [1x3x30 double]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>bfee_count:a count of the total number of beamforming measurements that have been recorded by the driver and sent to the space</p>
+</li>
+<li><p>Nrx:represents the number of antennas used to receive the packet by this NIC</p>
+</li>
+<li><p>Ntx:represents the number of space/time streams transmitted</p>
+</li>
+<li><p>prem:The sample value of [3 2 1] implies that Antenna C was sent to RF Chain A, Antenna B to Chain B, and Antenna A to Chain C</p>
+</li>
+<li><p>csi:It is a Ntx x Nrx x 30 3-D matrix where the third dimension is across 30 subcarriers in the OFDM channel</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; csi = get_scaled_csi(csi_entry);     // we use the script get_scaled_cis.m to do this</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>Let’s look at the three different spatial paths on the 1x3 link we measured<br>(Running the code with the Nrx is not 3 and the Ntx is not 1,there is a problem;i use the squeeze() turns csi<br>in to a 3x30 matrix,but at first,the matrix is 1x3x30,we should turn the matrix shape)</p>
+<p>The complete block of code is shown below.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">csi_trace = read_bf_file(&apos;sample_data/log.all_csi.6.7.6&apos;);</span><br><span class="line">csi_entry = csi_trace&#123;1&#125;;</span><br><span class="line">csi = get_scaled_csi(csi_entry);</span><br><span class="line">plot(db(abs(squeeze(csi).&apos;)));</span><br><span class="line">legend(&apos;RX Antenna A&apos;, &apos;RX Antenna B&apos;, &apos;RX Antenna C&apos;, &apos;Location&apos;, &apos;SouthEast&apos; );</span><br><span class="line">xlabel(&apos;Subcarrier index&apos;);</span><br><span class="line">ylabel(&apos;SNR [dB]&apos;);</span><br></pre></td></tr></table></figure>
+
+<p>The result is shown below</p>
+<p><img src="../images/FT/image1.png" alt="avater"></p>
+<p>for the matrix shape is 3x3x30,i try to change the shape of the matrix into 1x3x30,so i can run the code correctly</p>
+<br>
+<br>
+
+
+<p>The complete block of code is shown below.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">csi_trace = read_bf_file(&apos;subcarrier_1snd.dat&apos;);</span><br><span class="line">csi_entry = csi_trace&#123;1&#125;;   % the matrix shape is 2x3x30</span><br><span class="line">csi = get_scaled_csi(csi_entry);</span><br><span class="line">csi = csi(1,:,:);</span><br><span class="line">subplot(1,2,1);</span><br><span class="line">plot(db(abs(squeeze(csi).&apos;)));</span><br><span class="line">legend(&apos;RX Antenna A&apos;, &apos;RX Antenna B&apos;, &apos;RX Antenna C&apos;, &apos;Location&apos;, &apos;SouthEast&apos; );</span><br><span class="line">xlabel(&apos;Subcarrier index&apos;);</span><br><span class="line">ylabel(&apos;SNR [dB]&apos;);</span><br></pre></td></tr></table></figure>
+
+<p>The result is shown below<br><img src="../images/FT/image2.png" alt="avater"></p>
+<p>notice: The above data can be obtain from the Internet;In netx chapter,i will use the data that is got from the NIC</p>
+<br>
+
+<p>before we realize ft,we must know some knowledge.</p>
+<p><a href="https://blog.csdn.net/longbei9029/article/details/80763568" target="_blank" rel="noopener">分辨率、帧速率、码流、采样位深、采样率、比特率</a></p>
+<p><a href="https://ww2.mathworks.cn/help/matlab/math/fourier-transforms.html" target="_blank" rel="noopener">傅里叶变换</a></p>
+<p><a href="http://blog.sina.com.cn/s/blog_a1d5b9ba0102vxj2.html" target="_blank" rel="noopener">用Matlab进行快速傅里叶变换</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">clear           % 清空变量区</span><br><span class="line">Fs = 128;       % 采样频率</span><br><span class="line">T = 1/Fs;       % 采样时间</span><br><span class="line">L = 256;        % 信号长度</span><br><span class="line">t = (0:L-1)*T;  % 将范围0-L,乘以T</span><br><span class="line">x = 5 + 7*cos(2*pi*15*t - 30*pi/180) + 3*cos(2*pi*40*t - 90*pi/180);   %cos为底原始信号</span><br><span class="line">% 频率15HZ和频率40Hz</span><br><span class="line">y = x + randn(size(t));     %添加噪声</span><br><span class="line">figure</span><br><span class="line">plot(t,y)</span><br></pre></td></tr></table></figure>
+
+<br>
+<hr>
+<br>
+
+<p><img src="../images/FT/image3.png" alt="avatar"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">% 在上面的基础上</span><br><span class="line">N = 2^nextpow2(L); %采样点数，采样点数越大，分辨的频率越精确，N&gt;=L，超出的部分信号补为0</span><br><span class="line">% nextpow2(L),返回一个数n，即2的n次方最接近于L</span><br><span class="line"></span><br><span class="line">Y = fft(y,N)/N*2;   %除以N乘以2才是真实幅值，N越大，幅值精度越高</span><br><span class="line">% 参考其他文章 https://blog.csdn.net/jasondooc/article/details/50202389</span><br><span class="line"></span><br><span class="line">f = Fs/N*(0:1:N-1); %频率</span><br><span class="line"></span><br><span class="line">A = abs(Y);     %幅值,如a+bi,幅值 = sqrt(a*a+b*b)</span><br><span class="line"></span><br><span class="line">P = angle(Y);   %相值</span><br><span class="line"></span><br><span class="line">figure;</span><br><span class="line"></span><br><span class="line">subplot(211);</span><br><span class="line"></span><br><span class="line">plot(f(1:N/2),A(1:N/2));   %函数fft返回值的数据结构具有对称性,因此我们只取前一半</span><br><span class="line"></span><br><span class="line">title(&apos;幅值频谱&apos;);</span><br><span class="line"></span><br><span class="line">xlabel(&apos;频率(Hz)&apos;);</span><br><span class="line"></span><br><span class="line">ylabel(&apos;幅值&apos;);</span><br><span class="line"></span><br><span class="line">subplot(212);plot(f(1:N/2),P(1:N/2));</span><br><span class="line"></span><br><span class="line">title(&apos;相位谱频&apos;);</span><br><span class="line"></span><br><span class="line">xlabel(&apos;频率(Hz)&apos;);</span><br><span class="line"></span><br><span class="line">ylabel(&apos;相位&apos;);</span><br></pre></td></tr></table></figure>
+
+<br>
+
+<p><img src="../images/FT/image4.png" alt="avatar"></p>
+<br>
+<br>
+
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/17/hello-world/" rel="next" title="(第一阶段)关于CSI工具的安装与数据读取">
+                <i class="fa fa-chevron-left"></i> (第一阶段)关于CSI工具的安装与数据读取
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/21/Linux-802-11n-CSI-Tool/" rel="prev" title="Linux 802.11n CSI Tool">
+                Linux 802.11n CSI Tool <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="几个不知名的同学">
+            
+              <p class="site-author-name" itemprop="name">几个不知名的同学</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#本文目录"><span class="nav-number">1.</span> <span class="nav-text">本文目录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本文参考"><span class="nav-number">1.1.</span> <span class="nav-text">本文参考</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#笔记"><span class="nav-number"></span> <span class="nav-text">笔记</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">几个不知名的同学</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共2.1k字</span>
+</div>
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
